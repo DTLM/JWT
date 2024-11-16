@@ -1,12 +1,17 @@
 package com.estudo.jwt.service.imple;
 
 import com.estudo.jwt.bean.dto.UsuarioDto;
+import com.estudo.jwt.bean.dto.UsuarioResponse;
 import com.estudo.jwt.exception.UserExistsException;
 import com.estudo.jwt.exception.UserNotFoundException;
+import com.estudo.jwt.exception.WrongPasswordException;
 import com.estudo.jwt.modal.Usuario;
 import com.estudo.jwt.repository.IUsuarioRepository;
+import com.estudo.jwt.service.IAutenticacaoService;
 import com.estudo.jwt.service.IRoleService;
 import com.estudo.jwt.service.IUsuarioService;
+import com.estudo.jwt.util.Util;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,23 +20,19 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UsuarioService implements IUsuarioService {
 	
-	private IUsuarioRepository repository;
+	private final IUsuarioRepository repository;
 
-	private IRoleService roleService;
+	private final IRoleService roleService;
 
-	private BCryptPasswordEncoder bc;
-	
-	@Autowired
-	public UsuarioService(IUsuarioRepository repo, BCryptPasswordEncoder bc, IRoleService roleService) {
-		this.repository = repo;
-		this.bc = bc;
-		this.roleService = roleService;
-	}
+	private final BCryptPasswordEncoder bc;
+
+	private final IAutenticacaoService autenticacaoService;
 	
 	@Override
-	public void createUser(UsuarioDto user) throws UserExistsException {
+	public UsuarioResponse createUser(UsuarioDto user) throws Exception {
 		Optional<Usuario> op = repository.findByEmail(user.getEmail());
 		if(op.isPresent()) {
 			throw new UserExistsException("Usuario já cadastrado.");
@@ -39,8 +40,10 @@ public class UsuarioService implements IUsuarioService {
 		Usuario usuario = Usuario.builder()
 				.email(user.getEmail())
 				.senha(bc.encode(user.getSenha()))
+				.codigoSeguranca(Util.gerarCodigoSeguranca())
 				.build();
-        repository.save(usuario);
+        usuario = repository.save(usuario);
+		return UsuarioResponse.builder().token(autenticacaoService.gerarToken(user).getToken()).nome(usuario.getName()).email(usuario.getEmail()).build();
 	}
 
 	@Override
@@ -49,20 +52,25 @@ public class UsuarioService implements IUsuarioService {
 	}
 
 	@Override
-	public Usuario update(UsuarioDto user) throws Exception {
+	public UsuarioResponse update(UsuarioDto user) throws Exception {
 		Optional<Usuario> op = repository.findByEmail(user.getEmail());
 		if(op.isEmpty()){
 			throw new UserNotFoundException("User " + user.getEmail() + " not found");
 		}
 		Usuario usuario = op.get();
-		usuario.setRole(this.roleService.findById(user.getRoleId()));
-		usuario.setName(user.getName());
-		usuario.setEmail(user.getEmail());
-		if(user.getSenha() != null && !user.getSenha().isBlank()){
-			usuario.setSenha(bc.encode(user.getSenha()));
+		if(user.getSenhaNova() != null && !user.getSenhaNova().isBlank()){
+			if(usuario.isPasswordCorrect(user.getSenha())){
+				usuario.setSenha(bc.encode(user.getSenhaNova()));
+			} else {
+				throw new WrongPasswordException("Senha atual incorreta.");
+			}
 		} else {
 			usuario.setSenha(usuario.getSenha());
 		}
-		return this.repository.save(usuario);
+		usuario.setRole(this.roleService.findById(user.getRoleId()));
+		usuario.setName(user.getName());
+		usuario.setEmail(user.getEmail());
+		usuario = this.repository.save(usuario);
+		return UsuarioResponse.builder().token(autenticacaoService.gerarToken(user).getToken()).nome(usuario.getName()).email(usuario.getEmail()).build();
 	}
 }

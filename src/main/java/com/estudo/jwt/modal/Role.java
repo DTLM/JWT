@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Set;
 
 @Entity
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -24,7 +23,8 @@ public class Role implements Serializable{
 	private Long id;
 	@Column(nullable = false)
 	private String nome;
-	@ElementCollection(fetch = FetchType.EAGER)
+
+	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name = "role_autoridades", joinColumns =  @JoinColumn(name = "role_id"))
 	@Column(name="autoridade")
 	private Set<String> autoridades;

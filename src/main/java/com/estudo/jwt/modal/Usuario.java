@@ -1,15 +1,13 @@
 package com.estudo.jwt.modal;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -21,8 +19,9 @@ import java.util.stream.Collectors;
  */
 
 @Entity
-@Data
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @DynamicInsert
@@ -39,9 +38,10 @@ public class Usuario implements Serializable, UserDetails {
 	private String email;
 	@Column(nullable = false)
 	private String senha;
+	@Column(nullable = false, updatable = false)
+	private String codigoSeguranca;
 	@OneToOne(optional = false)
 	private Role role;
-
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return this.role.getAutoridades().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
@@ -76,4 +76,12 @@ public class Usuario implements Serializable, UserDetails {
 	public boolean isEnabled() {
 		return true;
 	}
+
+	public boolean isPasswordCorrect(String password) {
+		if(password == null || password.isBlank()) {
+			throw new NullPointerException("Senha não pode ser nula ou em branco.");
+		}
+		BCryptPasswordEncoder bc = new BCryptPasswordEncoder();
+        return bc.matches(password, this.senha);
+    }
 }

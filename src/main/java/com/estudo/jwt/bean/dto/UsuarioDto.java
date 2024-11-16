@@ -1,8 +1,7 @@
 package com.estudo.jwt.bean.dto;
 
+import jakarta.annotation.Nonnull;
 import lombok.*;
-
-import java.util.Map;
 
 @Setter
 @Getter
@@ -10,18 +9,14 @@ import java.util.Map;
 @NoArgsConstructor
 @Builder
 public class UsuarioDto {
-    @NonNull
+    @Nonnull
     private String email;
-    @NonNull
-    private Map<String, Object> dados;
+    @Nonnull
     private String senha;
+    private String senhaNova;
     private String name;
     private Long RoleId;
-
     public boolean isValidDataToCreateToken() {
-        if(this.email.isBlank() || this.dados.isEmpty()) {
-            return false;
-        }
-        return true;
+        return !this.email.isBlank();
     }
 }

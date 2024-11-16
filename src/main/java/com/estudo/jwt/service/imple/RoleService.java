@@ -3,21 +3,19 @@ package com.estudo.jwt.service.imple;
 import com.estudo.jwt.modal.Role;
 import com.estudo.jwt.repository.IRoleRepository;
 import com.estudo.jwt.service.IRoleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class RoleService implements IRoleService{
 	
-	private IRoleRepository repository;
+	private final IRoleRepository repository;
 
-	@Autowired
-	public RoleService(IRoleRepository repo) {
-		this.repository = repo;
-	}
-	
+
 	@Override
 	public Role getByNome(String nome) {
 		return repository.getByNome(nome);
