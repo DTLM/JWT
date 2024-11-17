@@ -6,7 +6,7 @@ import com.estudo.jwt.bean.dto.TokenDto;
 import com.estudo.jwt.bean.dto.UsuarioDto;
 import com.estudo.jwt.exception.DataInvalidException;
 import com.estudo.jwt.exception.UserNotFoundException;
-import com.estudo.jwt.modal.Usuario;
+import com.estudo.jwt.model.Usuario;
 import com.estudo.jwt.service.IAutenticacaoService;
 import com.estudo.jwt.service.IJwtService;
 import com.estudo.jwt.service.IUsuarioService;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

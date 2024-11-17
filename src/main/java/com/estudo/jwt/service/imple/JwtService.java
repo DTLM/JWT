@@ -21,7 +21,7 @@ import java.util.function.Function;
 @Service
 public class JwtService implements IJwtService{
     @Value("${secret.key}")
-    private static String SECRET_KEY;
+    private String SECRET_KEY;
 
     // função que retorna o email do jwt
     @Override

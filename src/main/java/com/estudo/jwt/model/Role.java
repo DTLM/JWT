@@ -1,4 +1,4 @@
-package com.estudo.jwt.modal;
+package com.estudo.jwt.model;
 
 import jakarta.persistence.*;
 import lombok.*;

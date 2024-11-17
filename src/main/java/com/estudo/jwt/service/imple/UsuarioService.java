@@ -5,14 +5,13 @@ import com.estudo.jwt.bean.dto.UsuarioResponse;
 import com.estudo.jwt.exception.UserExistsException;
 import com.estudo.jwt.exception.UserNotFoundException;
 import com.estudo.jwt.exception.WrongPasswordException;
-import com.estudo.jwt.modal.Usuario;
+import com.estudo.jwt.model.Usuario;
 import com.estudo.jwt.repository.IUsuarioRepository;
 import com.estudo.jwt.service.IAutenticacaoService;
 import com.estudo.jwt.service.IRoleService;
 import com.estudo.jwt.service.IUsuarioService;
 import com.estudo.jwt.util.Util;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,6 @@ public class UsuarioService implements IUsuarioService {
 
 	private final BCryptPasswordEncoder bc;
 
-	private final IAutenticacaoService autenticacaoService;
-	
 	@Override
 	public UsuarioResponse createUser(UsuarioDto user) throws Exception {
 		Optional<Usuario> op = repository.findByEmail(user.getEmail());
@@ -41,14 +38,21 @@ public class UsuarioService implements IUsuarioService {
 				.email(user.getEmail())
 				.senha(bc.encode(user.getSenha()))
 				.codigoSeguranca(Util.gerarCodigoSeguranca())
+				.role(this.roleService.findById(user.getRoleId()))
 				.build();
         usuario = repository.save(usuario);
-		return UsuarioResponse.builder().token(autenticacaoService.gerarToken(user).getToken()).nome(usuario.getName()).email(usuario.getEmail()).build();
+		return UsuarioResponse.builder().nome(usuario.getName()).email(usuario.getEmail()).role(usuario.getRole().getNome()).build();
 	}
 
 	@Override
 	public Usuario getByUsername(String username) throws Exception {
 		return repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
+	}
+
+	@Override
+	public UsuarioResponse getUsuarioResponseByUsername(String username) throws Exception {
+		Usuario user = repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
+		return UsuarioResponse.builder().role(user.getRole().getNome()).nome(user.getName()).email(user.getEmail()).build();
 	}
 
 	@Override
@@ -71,6 +75,6 @@ public class UsuarioService implements IUsuarioService {
 		usuario.setName(user.getName());
 		usuario.setEmail(user.getEmail());
 		usuario = this.repository.save(usuario);
-		return UsuarioResponse.builder().token(autenticacaoService.gerarToken(user).getToken()).nome(usuario.getName()).email(usuario.getEmail()).build();
+		return UsuarioResponse.builder().nome(usuario.getName()).email(usuario.getEmail()).role(usuario.getRole().getNome()).build();
 	}
 }

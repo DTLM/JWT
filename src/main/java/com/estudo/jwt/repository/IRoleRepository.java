@@ -1,6 +1,6 @@
 package com.estudo.jwt.repository;
 
-import com.estudo.jwt.modal.Role;
+import com.estudo.jwt.model.Role;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

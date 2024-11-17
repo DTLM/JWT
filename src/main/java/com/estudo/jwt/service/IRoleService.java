@@ -1,6 +1,6 @@
 package com.estudo.jwt.service;
 
-import com.estudo.jwt.modal.Role;
+import com.estudo.jwt.model.Role;
 
 public interface IRoleService {
 

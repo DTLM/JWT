@@ -1,6 +1,8 @@
 package com.estudo.jwt.security;
 
+import com.estudo.jwt.model.Usuario;
 import com.estudo.jwt.service.IJwtService;
+import com.estudo.jwt.service.IUsuarioService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,23 +11,23 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
-@Component
 @Configuration
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
 
     private final IJwtService jwtService;
-
+    private final IUsuarioService usuarioService;
     private final UserDetailsService userDetailsService;
 
     @Override
@@ -54,7 +56,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 /**
                  * Etapa 3 - No caso de não estar autenticado, então é necessario ver se esse email existe.
                  */
-                UserDetails user = userDetailsService.loadUserByUsername(email);
+                Usuario user = null;
+                try {
+                    user = usuarioService.getByUsername(email);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 /**
                  * Etapa 4 - Verificar se o token criado é valido.
                  */
@@ -65,7 +72,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken userToken = new UsernamePasswordAuthenticationToken(
                             user,
                             null,
-                            user.getAuthorities()
+                            user.getRole().getAutoridades().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
                     );
                     userToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(userToken);

@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.util.List;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 /**
  * @author Thiago Leal Martins
  * @apiNote classe de configuração. Onde aplica os filtros criados na cadeia de filtros
@@ -37,10 +39,11 @@ public class SecurityConfig{
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.
                 csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(autorize -> autorize
-                        .requestMatchers("/authenticate/**")
-                        .permitAll()
+                        .requestMatchers("/authenticate/**").permitAll()
                         .requestMatchers("/usuario/**").access(customManager)
+                        .requestMatchers("/test").permitAll()
                         .anyRequest()
                         .authenticated()
                 )

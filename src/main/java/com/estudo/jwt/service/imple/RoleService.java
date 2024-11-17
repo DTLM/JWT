@@ -1,10 +1,9 @@
 package com.estudo.jwt.service.imple;
 
-import com.estudo.jwt.modal.Role;
+import com.estudo.jwt.model.Role;
 import com.estudo.jwt.repository.IRoleRepository;
 import com.estudo.jwt.service.IRoleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

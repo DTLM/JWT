@@ -1,4 +1,4 @@
-package com.estudo.jwt.modal;
+package com.estudo.jwt.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,13 +34,14 @@ public class Usuario implements Serializable, UserDetails {
 	@Column(nullable = false)
 	private String name;
 	// email
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String email;
 	@Column(nullable = false)
 	private String senha;
 	@Column(nullable = false, updatable = false)
 	private String codigoSeguranca;
-	@OneToOne(optional = false)
+	@OneToOne(optional = false, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
 	private Role role;
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

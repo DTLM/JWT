@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/usuario")
 @RequiredArgsConstructor
-@Secured({"ROLE_ADM","ROLE_MANAGER"})
+@Secured({"READ","CREATE"})
 public class UsuarioControler {
 
 	private final IUsuarioService service;
@@ -37,6 +37,19 @@ public class UsuarioControler {
 				return ResponseEntity.badRequest().body("Usuario Nulo");
 			}
 			UsuarioResponse user = this.service.update(usuario);
+			return ResponseEntity.ok().body(user);
+		} catch (Exception e){
+			e.printStackTrace();
+			return ResponseEntity.internalServerError().body(e.getMessage());
+		}
+	}
+	@GetMapping("/getUsuario")
+	public ResponseEntity getUsuario(@RequestBody UsuarioDto usuario) {
+		try{
+			if(usuario == null) {
+				return ResponseEntity.badRequest().body("Usuario Nulo");
+			}
+			UsuarioResponse user = this.service.getUsuarioResponseByUsername(usuario.getEmail());
 			return ResponseEntity.ok().body(user);
 		} catch (Exception e){
 			e.printStackTrace();

@@ -1,7 +1,7 @@
 package com.estudo.jwt.custom;
 
 import com.estudo.jwt.exception.UserNotFoundException;
-import com.estudo.jwt.modal.Usuario;
+import com.estudo.jwt.model.Usuario;
 import com.estudo.jwt.service.IUsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,6 @@ public class CustomPermissionEvaluator {
             return true;
         }
         String method = request.getMethod();
-
         return switch (method) {
             case "GET" -> checkPermission(authentication, "READ");
             case "POST" -> checkPermission(authentication, "CREATE");
